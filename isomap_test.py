@@ -7,17 +7,19 @@ X = np.random.rand(n,m)
 n_neighbors = 5
 out_dim = 3
 
-print 'Using random data'
-Y = manifold.Isomap(n_neighbors, out_dim).fit_transform(X)
-print 'X shape: %s, out_dim:%d Y shape: %s' % (X.shape, out_dim, Y.shape)
 
-print 'Using the data X.npy and Isomap'
+Y = manifold.Isomap(n_neighbors, out_dim).fit_transform(X)
+print 'Using random data and Isomap'
+print 'X shape:%s, out_dim:%d, Y shape: %s' % (X.shape, out_dim, Y.shape)
+
 X = np.load('X.npy')
 Y = manifold.Isomap(n_neighbors, out_dim).fit_transform(X)
-print 'X shape: %s, out_dim:%d Y shape: %s' % (X.shape, out_dim, Y.shape)
-
+print
+print 'Using the data X.npy and Isomap'
+print 'X shape:%s, out_dim:%d, Y shape: %s' % (X.shape, out_dim, Y.shape)
 
 Y = manifold.LocallyLinearEmbedding(n_neighbors, out_dim).fit_transform(X)
-
+print
 print 'Using the data X.npy and LLE'
-print 'X shape: %s, out_dim:%d Y shape: %s' % (X.shape, out_dim, Y.shape)
+print 'X shape:%s, out_dim:%d, Y shape: %s' % (X.shape, out_dim, Y.shape)
+
