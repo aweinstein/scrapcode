@@ -104,7 +104,7 @@ def nystrom(A, B):
     nvec = 2
     E = np.zeros((n+m, nvec))
     for i in range(nvec):
-	E[:, i] = V[:,i+1] / V[:,0]
+	E[:, i] = V[:,i+1] / norm(V[:,i])
 
     return E
 
@@ -184,12 +184,16 @@ def experiment_1():
 
     
 def experiment_3():
+
     annulus, clump = annulus_clump()
     points = np.vstack((clump, annulus))
+    #points = np.load('annulus_clump.npy')
+
     N = points.shape[0]
     # Shuffle the points. This way the first block of W is equal to A
-    #np.random.shuffle(points)
     i_samples = np.random.permutation(N)
+
+    ## i_samples = np.load('i_samples.npy')
     points = points[i_samples,:]
 
     sigma_affinity = 0.5
@@ -213,7 +217,7 @@ def experiment_3():
     # sample points and use nystrom extension
     sampling = 0.5
     n_sample = int(points.shape[0] * sampling)
-    n_sample = 60
+    n_sample = 100
     A = affinity(points[:n_sample,:], sigma=sigma_affinity)
     B = affinity(points[:n_sample,:], points[n_sample:,:], 
                  sigma=sigma_affinity)
@@ -221,40 +225,33 @@ def experiment_3():
     v1 = E[:,0] / norm(E[:,0])
     v2 = E[:,1] / norm(E[:,1])
 
-    import scipy.io
-    scipy.io.savemat('data1.mat', {'A':A, 'B':B, 'E':E, 'W':W})
-
     v1_sort = v1[np.argsort(i_samples)]
     embedding_sort = embedding[np.argsort(i_samples)]
     fs1 = fisher_separation(embedding_sort[:50], embedding_sort[50:])
     fs2 = fisher_separation(v1_sort[:50], v1_sort[50:])
     print 'Fisher separation %.1f %.1f' % (fs1, fs2)
     
-    ## if norm(embedding - v1) > norm(embedding + v1):
-    ##     v1 *= -1
+    if norm(embedding - v1) > norm(embedding + v1):
+        v1 *= -1
+        v1_sort *= -1
     
     # plotting
     plt.close('all')
     
-    plt.figure()
-    plt.scatter(annulus[:,0], annulus[:,1])
-    plt.scatter(clump[:,0], clump[:,1], c='g')
-    plt.scatter(points[:n_sample,0], points[:n_sample,1], c='r', marker='x')
-    plt.axis('equal')
-    plt.grid()
+    ## plt.figure()
+    ## plt.scatter(annulus[:,0], annulus[:,1])
+    ## plt.scatter(clump[:,0], clump[:,1], c='g')
+    ## plt.scatter(points[:n_sample,0], points[:n_sample,1], c='r', marker='x')
+    ## plt.axis('equal')
+    ## plt.grid()
 
     plt.figure()
-    plt.plot(embedding, 'x')
-    plt.plot(v1, 'o')
-    plt.hlines(0, 0, N)
-
-    plt.figure()
+    plt.subplot(211)
+    plt.plot(embedding)
+    plt.plot(v1)
+    plt.subplot(212)
     plt.plot(embedding_sort)
     plt.plot(v1_sort)
-    
-    ## plt.figure()
-    ## plt.plot(range(50), embedding[:50], 'og')
-    ## plt.plot(range(50, 150), embedding[50:], 'ob')
 
     plt.show()
 

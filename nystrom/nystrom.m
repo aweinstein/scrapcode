@@ -1,8 +1,4 @@
-clear all
-clc
-%load data
-load data1
-Ep = E;
+function E = nystrom(A, B)
 
 n = size(A, 1);
 m = size(B, 2);
@@ -17,12 +13,8 @@ Q = A + Asi * (B * B') * Asi;
 [U, L, T] = svd(Q);
 V = [A; B'] * Asi * U * pinv(sqrt(L));
 nvec = 2;
+E = zeros(n+m, nvec);
 for i = 2:nvec+1,
-    E(:,i-1) = V(:,i) ./ V(:,1);
+    E(:,i-1) = V(:,i) ./ norm(V(:,i));
 end
 
-%[eigvecs, eigvals] = eig(W);
-
-plot(E)
-%figure
-%plot(eigvecs(:,13:14))
