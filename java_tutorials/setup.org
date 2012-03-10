@@ -1,0 +1,30 @@
+Installing the Oracle Java SDK
+
+* What version am I running?
+
+java -version
+javac -version
+
+* Installation
+
+See http://askubuntu.com/questions/55848/how-do-i-install-oracle-java-jdk-7
+http://askubuntu.com/questions/67909/how-do-i-install-oracles-jdk-6
+
+
+Download from
+http://www.oracle.com/technetwork/java/javase/downloads/index.html
+
+Andcompress and move:
+
+tar xzvf jdk-7u3-linux-i586.tar.gz 
+sudo mv jdk1.7.0_03/ /usr/lib/jvm/jdk1.7.0
+
+
+sudo update-alternatives --install "/usr/bin/java" "java" "/usr/lib/jvm/jdk1.7.0/bin/java" 1
+sudo update-alternatives --install "/usr/bin/javac" "javac" "/usr/lib/jvm/jdk1.7.0/bin/javac" 1
+sudo update-alternatives --install "/usr/bin/javaws" "javaws" "/usr/lib/jvm/jdk1.7.0/bin/javaws" 1
+
+
+sudo update-alternatives --config java
+sudo update-alternatives --config javac
+sudo update-alternatives --config javaws

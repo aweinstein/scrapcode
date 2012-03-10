@@ -1,4 +1,5 @@
 // The static keyword
+// http://xahlee.org/java-a-day/instance_vs_class_members.html
 
 class T2 
 {
