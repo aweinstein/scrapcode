@@ -1,0 +1,250 @@
+#+TITLE: Some notes about Gensim tutorials
+#+OPTIONS: LaTeX:t
+#+LaTeX_HEADER: \usepackage{lmodern}
+#+LaTeX_HEADER: \usepackage{amsmath}
+#+LaTeX_HEADER: \DeclareMathOperator{\tf}{tf}
+#+LaTeX_HEADER: \DeclareMathOperator{\df}{df}
+#+LaTeX_HEADER: \DeclareMathOperator{\idf}{idf}
+#+LaTeX_HEADER: \DeclareMathOperator{\tfidf}{tf-idf}
+
+#+OPTIONS: f:nil
+#+MATHJAX: align:"left" mathml:t path:"http://orgmode.org/mathjax/MathJax.js"
+
+* Introduction
+
+In this document we analyse the [[http://nlp.fi.muni.cz/projekty/gensim/index.html][Gensim]] tutorial and we look at some of the
+implementations details.
+
+
+* Tutorial 1
+Let see what’s going on in the [[http://nlp.fi.muni.cz/projekty/gensim/tut1.html][first tutorial]]. After tokenizing the set of
+documents (removing the stop words, changing everything to lower case and
+removing the words that appear only once), we have a list of lists that looks
+like
+
+#+begin_src xpython :results pp
+In [18]: texts
+Out[18]:
+[['human', 'interface', 'computer'],
+['survey', 'user', 'computer', 'system', 'response', 'time'],
+['eps', 'user', 'interface', 'system'],
+['system', 'human', 'system', 'eps'],
+['user', 'response', 'time'],
+['trees'],
+['graph', 'trees'],
+['graph', 'minors', 'trees'],
+['graph', 'minors', 'survey']]
+#+end_src
+
+
+We then create a =corpora.Dictionary=:
+
+#+begin_src python
+dictionary = corpora.Dictionary(texts)
+#+end_src
+
+
+This dictionary “encapsulates the mapping between normalized words and their
+integer ids”. For instance:
+
+#+begin_src python
+In [36]: dictionary.token2id['trees']
+Out[36]: 9
+
+In [37]: dictionary[9]
+Out[37]: 'trees'
+#+end_src
+
+More importantly, it provides the =doc2bow= function, that “Convert `document`
+(a list of words) into the bag-of-words format = list of "(token\_id,
+token\_count) 2-tuples." For instance:
+
+#+begin_src python
+In [40]: newDoc = "Human computer interaction"
+In [41]: newVec = dictionary.doc2bow(newDoc.lower().split())
+In [42]: print newVec
+[(0, 1), (1, 1)]
+#+end_src
+
+Note that the list of words must be tokenized and normalize before. The
+=doc2bow= function is important because we use it to build the corpus. The
+corpus is a "list of lists', where each entry is a list of (token\_id,
+token\_count) 2-tuples. So
+
+#+begin_src python
+In [44]: corpus = [dictionary.doc2bow(text) for text in texts]
+In [45]: print corpus
+[[(0, 1), (1, 1), (2, 1)],
+[(0, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1)],
+[(2, 1), (5, 1), (7, 1), (8, 1)],
+[(1, 1), (5, 2), (8, 1)],
+[(3, 1), (6, 1), (7, 1)],
+[(9, 1)], [(9, 1), (10, 1)],
+[(9, 1), (10, 1), (11, 1)],
+[(4, 1), (10, 1), (11, 1)]]
+#+end_src
+
+In general, corpora are rather big, so we don't want to store it all in
+memory. Gensim only requires that a corpus must be able to return one document
+vector at a time. For instance, we can define the class
+
+#+begin_src python
+class MyCorpus(object):
+    def __iter__(self):
+        for line in open('mycorpus.txt'):
+            # assume there's one document per line, tokens separated by
+            # whitespace
+            yield dictionary.doc2bow(line.lower().split())
+
+corpus_memory_friendly = MyCorpus()
+#+end_src
+
+We can also avoid loading all the corpus text into memory to build the
+dictionary. For example, if the documents are in the file =mycorpus.txt= (one
+document per line), we can create the dictioanry as
+
+#+begin_src python
+dictionary = corpora.Dictionary(line.lower().split() for 
+                                line in open('mycorpus.txt'))
+#+end_src
+
+and then do some pruning using the =filter_tokens= method of the dictionary:
+
+#+begin_src python
+# remove stop words and words that appear only once
+stop_ids = [dictionary.token2id[stopword] for stopword in stoplist
+            if stopword in dictionary.token2id]
+once_ids = [tokenid for tokenid, docfreq in dictionary.dfs.iteritems()
+            if docfreq == 1]
+dictionary.filter_tokens(stop_ids + once_ids) # remove stop words and words that
+                                              # appear only once
+dictionary.compactify() # remove gaps in id sequence after words that were
+                        # removed
+#+end_src
+
+Finally, we can save the dictionary and corpus to disk:
+
+#+begin_src python
+dictionary.save('/tmp/deerwester.dict')
+corpora.MmCorpus.serialize('/tmp/deerwester.mm', corpus)
+#+end_src
+
+** Implementation details
+
+In this tutorial we use the =corpora.Dictionary= class defined in
+=corpora/dictionary.py=. This class inherit from =UserDict.DictMixin=. Most of
+the information is stored in the dictionaries =token2id=, =id2token= and =dfs=
+(store the number of documents each token has appeared). The heavy lifting is
+done in the =doc2bow= method. This method is used internally (with the
+=allow_update= parameter set to =True=) to build the dictionary.
+
+
+* Tutorial 2
+
+The second tutorial assume you already executed the first tutorial and saved
+the dictionary and corpus to disc. It starts by loading this two variables:
+
+#+begin_src python
+dictionary = corpora.Dictionary.load('/tmp/deerwester.dict')
+corpus = corpora.MmCorpus('/tmp/deerwester.mm')
+#+end_src
+
+Once we have the corpus, we can use it to build a TF-IDF model:
+
+#+begin_src python
+tfidf = models.TfidfModel(corpus)
+#+end_src
+
+With this model we can transform any document, represented as a sparse
+bag-of-words into its TF-IDF representation:
+
+#+begin_src python
+In [15]: doc_bow = [(0, 1), (1, 1)]
+In [16]: print doc_bow, '->', tfidf[doc_bow]
+[(0, 1), (1, 1)] -> [(0, 0.70710678118654757), (1, 0.70710678118654757)]
+#+end_src
+
+Note that the TF-IDF transformation doesn't change the /support/ of the vector
+representation of a document.
+
+We can also apply the transformation to the whole corpus:
+
+#+begin_src python
+corpus_tfidf = tfidf[corpus]
+for doc in corpus_tfidf:
+    print doc
+  
+[(0, 0.57735026918962573), (1, 0.57735026918962573), (2, 0.57735026918962573)]
+[(0, 0.44424552527467476), (3, 0.44424552527467476), (4, 0.44424552527467476), (5, 0.32448702061385548), (6, 0.44424552527467476), (7, 0.32448702061385548)]
+[(2, 0.5710059809418182), (5, 0.41707573620227772), (7, 0.41707573620227772), (8, 0.5710059809418182)]
+[(1, 0.49182558987264147), (5, 0.71848116070837686), (8, 0.49182558987264147)]
+[(3, 0.62825804686700459), (6, 0.62825804686700459), (7, 0.45889394536615247)]
+[(9, 1.0)]
+[(9, 0.70710678118654746), (10, 0.70710678118654746)]
+[(9, 0.50804290089167492), (10, 0.50804290089167492), (11, 0.69554641952003704)]
+[(4, 0.62825804686700459), (10, 0.45889394536615247), (11, 0.62825804686700459)]
+#+end_src
+
+In turns, a vector in the TF-IDF space can be proyected into another space,
+like for instance, the LSI space. First we built the model using the corpus in
+the TF-IDF space:
+
+#+begin_src python
+lsi = models.LsiModel(corpus_tfidf,
+                      id2word=dictionary,
+                      num_topics=2) # initialize an LSI transformation
+#+end_src
+
+And now that we built the model we can proyect the corpus into the LSI space:
+
+#+begin_src python
+corpus_lsi = lsi[corpus_tfidf] # create a double wrapper over the original
+                               # corpus: bow->tfidf->fold-in-lsi
+#+end_src
+
+** TF-IDF implementation details
+
+The TF-IDF model is defined in the file =models/tfidfmodel.py=. The class
+=TfidfModel= inherits from the class =interfaces.TransformationABC=, that in
+turns inherits from the class =utils.SaveLoad==. The =TransformationABC= class
+contains an interface to map from one sparse vector space into another sparse
+vector space.  The method =initialize= take the corpus as a parameter and
+compute the number of documents that contain each term (stored in the =dfs=
+dictionary), and the number of documents in the corpus (=self.num_docs=). Then
+it call the function =dfs2idfs= to compute the inverse document frequency
+$\idf_t=\log_2\frac{N}{dt_t}$ for each =(term, frequency)= pair.
+
+The TF-IDF score is computed in the =__getitem__= method of the class. If the
+key used to get the item is a corpus, the =_apply= method, defined in the
+=TransformationABC= class is called. This method basically returns a generator
+that call the =__getitem__= function over each document in the corpus. If the
+key is the vector representation of a document, it map the vector using the
+TF-IDF score $\tfidf_{t,d}=\tf_{t,d}\times\idf_t$.
+
+** LSI implementation details
+
+The LSI model is defined in the file =models/lsimodel.py==. The class
+=LsiModel= inherits from the class =interfaces.TransformationABC=. In the class
+constructor, a =Projection= object is instantiated with the number of terms in
+the corpus and the number of topics, and then execute the =add_documents=
+method with the TF-IDF corpus as argument. In this tutorial we are using the
+one-pass serial version of the algorithm, with =chunnksize= set to its default
+value of 20000. Since we have only 9 documents, all the documents are processed
+in one chunk. For each "chunk" of documents, the corresponding part of the
+corpus is transformed into a sparse matrix in /Compressed Sparse Column/ (CSC)
+format (=job= variable inside the =add_documents= method). The projection
+method is the used to compute the SVD and the projection into the latent
+dimensions.
+
+The =Projection= class implement the $(U,S)$ projection from the corpus. The
+method =merge= allows to update the projection with a previously computed
+projection. This feature is used when the corpus is divided in chunks. The
+constructor compute the $U, S$ decomposition (the left singular vectors and the
+singular vectors) using the stochastic SVD method (by Halko et. al.).
+
+Finally, proyecting the TF-IDF vector into the LSI space is done in the
+=__getitem__= method. By default (with =scaled=False=) the projection is done
+as $q = U^{-1}x$, rather than the original projection $q = S^{-1}U^{-1}x$.
+
+
+

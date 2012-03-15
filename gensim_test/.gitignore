@@ -1,0 +1,8 @@
+auto/
+*.dict
+*.index
+*.npy
+*.lsi
+*.mm
+*.log
+
