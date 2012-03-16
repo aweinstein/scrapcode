@@ -215,9 +215,7 @@ def experiment_3():
     W_embedding = W_eigvecs[:,1]
 
     # sample points and use nystrom extension
-    sampling = 0.5
-    n_sample = int(points.shape[0] * sampling)
-    n_sample = 100
+    n_sample = 50
     A = affinity(points[:n_sample,:], sigma=sigma_affinity)
     B = affinity(points[:n_sample,:], points[n_sample:,:], 
                  sigma=sigma_affinity)
@@ -238,20 +236,28 @@ def experiment_3():
     # plotting
     plt.close('all')
     
-    ## plt.figure()
-    ## plt.scatter(annulus[:,0], annulus[:,1])
-    ## plt.scatter(clump[:,0], clump[:,1], c='g')
-    ## plt.scatter(points[:n_sample,0], points[:n_sample,1], c='r', marker='x')
-    ## plt.axis('equal')
-    ## plt.grid()
+    plt.figure()
+    plt.scatter(annulus[:,0], annulus[:,1], s=40, c=(0.9,0.9,0.9))
+    plt.scatter(clump[:,0], clump[:,1], s=40,  c=(0.5, 0.5, 0.5))
+    plt.scatter(points[:n_sample,0], points[:n_sample,1], c='k', marker='x')
+    plt.axis('equal')
+    plt.grid()
+    plt.savefig('dataset.pdf')
 
     plt.figure()
-    plt.subplot(211)
+    #plt.subplot(211)
     plt.plot(embedding)
     plt.plot(v1)
-    plt.subplot(212)
-    plt.plot(embedding_sort)
-    plt.plot(v1_sort)
+
+    plt.figure(figsize=(16,5))
+    #plt.subplot(212)
+    plt.plot(embedding_sort, c=(0.7,0.7,0.7), lw=2, label='eigenvector')
+    plt.plot(v1_sort, c='k', lw=1.1, label='Nystrom approximation')
+    plt.xlim((0,N-1))
+    plt.xlabel('Point number')
+    plt.ylabel('Value of eigenvector')
+    plt.legend()
+    plt.savefig('eigenvector.pdf')
 
     plt.show()
 

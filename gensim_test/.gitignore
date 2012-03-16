@@ -6,3 +6,6 @@ auto/
 *.mm
 *.log
 
+gensim.pdf
+gensim.tex
+gensim.html
