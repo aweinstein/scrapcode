@@ -9,9 +9,8 @@
 
 #+LaTeX_HEADER: \lstset{basicstyle=\scriptsize}
 
-* Introduction
 
-  In this document we analyse the [[http://nlp.fi.muni.cz/projekty/gensim/index.html][Gensim]] (version 0.8.4)tutorial and we look at
+In this document we analyse the [[http://nlp.fi.muni.cz/projekty/gensim/index.html][Gensim]] (version 0.8.4)tutorial and we look at
 some of the implementations details.
 
 
@@ -256,3 +255,49 @@ when the similarity is computed.
 
 
 * Tutorial 3
+
+As before, this tutorial assumes you executed tutorial 1 before.  This tutorial
+compute the similarity between a new document, "Human computer interaction",
+and the documents already in the corpus.
+
+The first step is to tokenize the document and convert it into an LSI vector:
+
+#+begin_src python
+doc = "Human computer interaction"
+vec_bow = dictionary.doc2bow(doc.lower().split())
+# Convert the query to LSI space
+vec_lsi = lsi[vec_bow] 
+print vec_lsi
+
+[(0, 0.4618210045327158), (1, 0.070027665279000728)]
+#+end_src
+
+Then we create and index for the corpus. This index contains the LSI
+representation of all the documents of the corpus and allows to compute the
+cosine similarity between a given document and all the elements of the corpus.
+
+#+begin_src python
+# Transform corpus to LSI space and index it
+index = similarities.MatrixSimilarity(lsi[corpus])
+index.save('/tmp/deerwester.index')
+index = similarities.MatrixSimilarity.load('/tmp/deerwester.index')
+sims = index[vec_lsi] # perform a similarity query against the corpus
+sims = sorted(enumerate(sims), key=lambda item: -item[1])
+pprint(sims)
+
+[(2, 0.99844527),
+ (0, 0.99809301),
+ (3, 0.98658866),
+ (1, 0.93748635),
+ (4, 0.90755945),
+ (8, 0.050041772),
+ (7, -0.098794632),
+ (6, -0.10639259),
+ (5, -0.12416792)]
+#+end_src
+
+We see that according to the LSI model, documents 2, 0 and 3 (=['survey',
+'user', 'computer', 'system', 'response', 'time']=, =['human', 'interface',
+'computer']= and =['eps', 'user', 'interface', 'system']=) are the three most
+similar documents.
+

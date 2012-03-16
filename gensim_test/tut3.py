@@ -15,14 +15,15 @@ dictionary = corpora.Dictionary.load('/tmp/deerwester.dict')
 corpus = corpora.MmCorpus('/tmp/deerwester.mm')
 print corpus
 
-lsi = models.LsiModel(corpus, id2word=dictionary, numTopics=2)
+lsi = models.LsiModel(corpus, id2word=dictionary, num_topics=2)
 
 doc = "Human computer interaction"
 vec_bow = dictionary.doc2bow(doc.lower().split())
-vec_lsi = lsi[vec_bow] # convert the query to LSI space
+# Convert the query to LSI space
+vec_lsi = lsi[vec_bow] 
 print vec_lsi
-index = similarities.MatrixSimilarity(lsi[corpus]) # transform corpus to LSI
-                                                   # space and index it
+# Transform corpus to LSI space and index it
+index = similarities.MatrixSimilarity(lsi[corpus])
 index.save('/tmp/deerwester.index')
 index = similarities.MatrixSimilarity.load('/tmp/deerwester.index')
 
