@@ -132,11 +132,11 @@ corpora.MmCorpus.serialize('/tmp/deerwester.mm', corpus)
 ** Implementation details
 
 In this tutorial we use the =corpora.Dictionary= class defined in
-=corpora/dictionary.py=. This class inherit from =UserDict.DictMixin=. Most of
-the information is stored in the dictionaries =token2id=, =id2token= and =dfs=
-(store the frequency of each token). The heavy lifting is done in the =doc2bow=
-method. This method is used internally (with the =allow_update= parameter set
-to =True=) to build the dictionary.
+=corpora/dictionary.py=. This class is derived from =UserDict.DictMixin=. Most
+of the information is stored in the dictionaries =token2id=, =id2token= and
+=dfs= (store the frequency of each token). The heavy lifting is done in the
+=doc2bow= method. This method is used internally (with the =allow_update=
+parameter set to =True=) to build the dictionary.
 
 
 * Tutorial 2
@@ -208,8 +208,8 @@ corpus_lsi = lsi[corpus_tfidf]
 ** TF-IDF implementation details
 
 The TF-IDF model is defined in the file =models/tfidfmodel.py=. The class
-=TfidfModel= inherits from the class =interfaces.TransformationABC=, that in
-turns inherits from the class =utils.SaveLoad=. The =TransformationABC= class
+=TfidfModel= is derived from the class =interfaces.TransformationABC=, that in
+turns is derived from the class =utils.SaveLoad=. The =TransformationABC= class
 contains an interface to map from one sparse vector space into another sparse
 vector space.  The method =initialize= take the corpus as a parameter and
 compute the number of documents that contain each term (stored in the =dfs=
@@ -227,7 +227,7 @@ TF-IDF score $\tfidf_{t,d}=\tf_{t,d}\times\idf_t$.
 ** LSI implementation details
 
 The LSI model is defined in the file =models/lsimodel.py=. The class =LsiModel=
-inherits from the class =interfaces.TransformationABC=. In the class
+is derived from the class =interfaces.TransformationABC=. In the class
 constructor, a =Projection= object is instantiated with the number of terms in
 the corpus and the number of topics, and then executes the =add_documents=
 method with the TF-IDF corpus as argument. In this tutorial we are using the
@@ -300,4 +300,56 @@ We see that according to the LSI model, documents 2, 0 and 3 (=['survey',
 'user', 'computer', 'system', 'response', 'time']=, =['human', 'interface',
 'computer']= and =['eps', 'user', 'interface', 'system']=) are the three most
 similar documents.
+
+** Implementation details
+
+The class =MatrixSimilarity= together with the other similarity classes are
+defined in the file =similarities/docsim.py=. All the similarity classes is
+derived from the class =intefaces.SimilarityABC=, which in turns is derived
+from the class =utils.SaveLoad=. The =__init__= method stores in =self.index=
+the corpus as a sparse matrix in the Compressed Sparse Column (CSC) format. A
+similarity query =index[vec_lsi]= triggers a call to the =__get_item__=
+method. After normalizing the query vector, it call the =get_similarities=
+method. Since the query and all the vectors in the index are normalized, the
+similarity computation reduces to the product of the index matrix by the query
+matrix (the document vectors are rows in the index matrix, and columns in the
+query matrix).
+
+* Tutorial 4
+
+This tutorial creates an LSI (or LDA) model using the Wikipedia as a
+corpus. This is a two step process: (1) Compute the TF-IDF model, and (2)
+Compute the LSI model.
+
+Computing the TF-IDF model requires to pass over the data twice: one time to
+extract the dictionary, and a second time to compute the TF-IDF vectors. We do
+this by calling
+
+#+begin_src batch
+./wikicorpus.py enwiki-latest-pages-articles.xml.bz2 results/wiki_en
+#+end_src
+
+By default, the =DEFAULT_DICT_SIZE= (set to 50,000) most frequent words are
+kept in the words dictionary. Passing a third (optional) parameter to
+=wikicorpus= allows to set a different value for =DEFAULT_DICT_SIZE=.
+
+The dictionary is created by the =WikiCorpus= class, which is derived from
+=TextCorpus=. The class creates a =corpora.Dictionary=. This dictionary is
+initialized by the =get_texts= generator, which yield a text version of each
+article. After scanning all the articles, the dictionary is filtered to remove
+the tokens that appear in more than 10% of all documents, to remove the tokens
+that appear in less than 20 documents, and to keep the =DEFAULT_DICT_SIZE= most
+frequent words.
+
+
+The function =get_texts= process the Wikipedia dump line by line using a
+one-state state machine[fn:1]. The state is stored in the variable =intext=. This
+variable is set to =True= when the string =______<text= (each underscore
+represents a space) is detected, and set to =False= when the string =</text>=
+is found. All the lines scan while =intext= is =True= are considered as lines
+belonging to the same article.
+
+[fn:1]The following URL contains some details regarding the format of the Wikipedia
+XML dump: [[http://meta.wikimedia.org/wiki/Help:Export#Export_format]].
+
 
