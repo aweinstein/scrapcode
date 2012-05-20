@@ -1,1 +1,8 @@
 *.pyc
+*.pdf
+*.png
+*.gml
+*.pickle
+*.mat
+*.txt
+*.bz2

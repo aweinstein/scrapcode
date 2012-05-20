@@ -1,0 +1,10 @@
+| Place                  | Date        |       Lat |         Lon |
+|------------------------+-------------+-----------+-------------|
+| San Diego              | November 12 |    32.715 |   -117.1625 |
+| Santa Catalina         | November 25 | 33.383333 | -118.416667 |
+| San Pedro              | November 26 |  33.73583 |  -118.29139 |
+| Santa Barbara          | December 4  | 34.425833 | -119.714167 |
+| San Nicolas            | December 6  |     33.25 |      -119.5 |
+| La Purisima Concepcion | December 8  |  34.66962 |  -120.42142 |
+| Point Año Nuevo        | January 1   | 37.108333 | -122.337778 |
+|                        |             |           |             |
