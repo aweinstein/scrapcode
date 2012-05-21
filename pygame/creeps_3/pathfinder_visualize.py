@@ -15,7 +15,7 @@ class Visualizer(object):
         self.field = field
         self.message_func = message_func
         
-        self.grid_size = 15
+        self.grid_size = 15 # Number of pixels per grid
         
         self.field_color = Color('black')
         self.grid_color = Color('gray')
@@ -192,7 +192,7 @@ def run_game():
     FIELD_RECT = Rect(25, 130, 300, 300)
     MESSAGES_RECT = Rect(25, 450, 300, 50)
     TITLE_RECT = Rect(25, 10, 300, 90)
-    
+
     pygame.init()
     screen = pygame.display.set_mode(
                 (SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -203,6 +203,7 @@ def run_game():
     
     visualizer = Visualizer(screen, FIELD_RECT, message_func)
     
+    draw_title(screen, TITLE_RECT)
     while True:
         time_passed = clock.tick(30)
         
@@ -212,12 +213,9 @@ def run_game():
             else:
                 visualizer.user_event(event)
    
-        draw_title(screen, TITLE_RECT)
-    
         visualizer.draw()
        
         pygame.display.flip()
-
 
 def exit_game():
     sys.exit()
