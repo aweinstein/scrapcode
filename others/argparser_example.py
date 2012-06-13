@@ -14,13 +14,15 @@ if __name__ == '__main__':
     parser.add_argument('-data', help='Consume one parameter')
     parser.add_argument('-dint', type=int, 
                         help='Call function f_dint()')
-
+    parser.add_argument('-c', choices=['a', 'b'], 
+                        help='Choose between a or b')
     args = parser.parse_args()
 
     if args.bool:
         print 'Bool set to true.'
 
     print 'args.data = %s' % args.data
+    print 'args.c = %s' % args.c
 
     if args.dint:
         fname = 'fun_%d' % args.dint
