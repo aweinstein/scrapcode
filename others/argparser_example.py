@@ -6,16 +6,17 @@ def fun_1():
 def fun_2():
     print 'This is function 2'
 
-    
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='argparse example')
     parser.add_argument('-bool', action='store_true', default=False,
                         help='A boolean parameter, default to True')
     parser.add_argument('-data', help='Consume one parameter')
-    parser.add_argument('-dint', type=int, 
+    parser.add_argument('-dint', type=int,
                         help='Call function f_dint()')
-    parser.add_argument('-c', choices=['a', 'b'], 
+    parser.add_argument('-c', choices=['a', 'b'],
                         help='Choose between a or b')
+    parser.add_argument('-var', nargs='+') # Consume at least one argument
     args = parser.parse_args()
 
     if args.bool:
@@ -23,6 +24,7 @@ if __name__ == '__main__':
 
     print 'args.data = %s' % args.data
     print 'args.c = %s' % args.c
+    print 'args.var = %s' % args.var
 
     if args.dint:
         fname = 'fun_%d' % args.dint
