@@ -42,6 +42,17 @@ def test1():
     print '\nUsing G.degree and nx.laplacian to compute D'
     print Ln3
 
+def test2():
+    deg = [3,2,2,1,0]
+    G = nx.havel_hakimi_graph(deg)
+    # Add self loops
+    for node in G.nodes():
+        G.add_edge(node, node)
+    Ln = nx.normalized_laplacian(G)
+    print Ln
+    np.set_printoptions(4)
+    print repr(Ln)
+    
 def laplacian_matrix_aw(G, nodelist=None, weight='weight'):
     """Return the Laplacian matrix of G.
 
@@ -182,7 +193,7 @@ if __name__ == '__main__x':
 
     print nx.laplacian(G)
     print laplacian_matrix_aw(G)
-    
+    nn
     # Add self loop to all vertices
     Gsl = G.copy()
     for node in Gsl.nodes():
@@ -193,3 +204,4 @@ if __name__ == '__main__x':
 
 if __name__ == '__main__':
     test1()
+    test2()
