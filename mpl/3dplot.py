@@ -11,10 +11,7 @@ x = np.linspace(-2, 2, 100)
 X, Y = np.meshgrid(x, x)
 Z = np.sqrt(X**2 + Y**2)
 ax.plot_wireframe(X, Y, Z, rstride=1, cstride=1)
-
-plt.figure()
-x = np.linspace(-5, 5, 1000)
-y = np.sqrt(x**2)
-plt.plot(x, y)
+ax.set_xlim3d(-2.5, 2.5)
+ax.set_ylim3d(-2.5, 2.5)
 
 plt.show()
