@@ -1,4 +1,4 @@
-#!/usr/bin/env python   
+#!/usr/bin/env python
 import time
 import threading
 import Queue
@@ -10,11 +10,11 @@ class Producer(threading.Thread):
         self.running = True
         self.q = q
         print 'Producer thread started'
-        
+
     def stop(self):
         """Stop the thread execution."""
         self.running = False
-        print 'Producer thread stoped'
+        print 'Producer thread stopped'
 
     def run(self):
         while self.running:
@@ -28,11 +28,11 @@ class Consumer(threading.Thread):
         self.running = True
         self.q = q
         print 'Consumer thread started'
-        
+
     def stop(self):
         """Stop the thread execution."""
         self.running = False
-        print 'Consumer thread stoped'
+        print 'Consumer thread stopped'
 
     def run(self):
         while self.running:
@@ -44,12 +44,12 @@ if __name__ == "__main__":
 
     q = Queue.Queue()
     producer = Producer(q)
-    producer.setDaemon(True)
+    producer.daemon = True
     producer.start()
     consumer = Consumer(q)
-    consumer.setDaemon(True)
+    consumer.daemon = True
     consumer.start()
-    
+
     try:
         while(1):
             time.sleep(1)
