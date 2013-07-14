@@ -1,4 +1,4 @@
-#!/usr/bin/env python   
+#!/usr/bin/env python
 import socket
 import time
 import threading
@@ -41,10 +41,13 @@ class ClientConnection(threading.Thread):
                 break
             if not data:
                 logger.critical('Connection closed')
-                connected = False              
+                connected = False
             else:
                 self.process_data(data)
-        self.conn.shutdown(socket.SHUT_RDWR)
+        try:
+            self.conn.shutdown(socket.SHUT_RDWR)
+        except socket.error:
+            logger.info('Endpoint already disconnected, no need to shutdown.')
         self.conn.close()
         logger.info('Closing the connection socket')
 
@@ -57,7 +60,7 @@ class ClientConnection(threading.Thread):
         ## else:
         ##     logger.info('Unknow command received')
         ##     self.conn.send('Unknow command')
-        
+
 
 class Server(threading.Thread):
     """TCP server."""
@@ -128,7 +131,7 @@ if __name__ == "__main__":
     server = Server()
     server.setDaemon(True)
     server.start()
-    
+
     try:
         while(1):
             time.sleep(1)
@@ -136,4 +139,3 @@ if __name__ == "__main__":
         pass
     print ' '
     server.stop()
-

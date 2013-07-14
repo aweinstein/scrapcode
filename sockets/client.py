@@ -1,6 +1,13 @@
 #!/usr/bin/env python
 
-# Echo client program
+"""
+Echo client program
+
+Example (run each command in a different terminal):
+$ python server_multithread.py
+$ python client.py --port 62000 --delay 2000
+$ python client.py --port 62000 --delay 2000
+"""
 import socket
 import sys
 import string
@@ -47,4 +54,3 @@ except KeyboardInterrupt:
     pass
 
 s.close()
-
