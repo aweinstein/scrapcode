@@ -8,7 +8,7 @@ import sys
 class TCPHandlerBase(SocketServer.BaseRequestHandler):
     """Instantiated once per connection."""
     def handle(self):
-        # self.request is  the TCP socket connected to the client
+        # self.request is the TCP socket connected to the client
         self.data = self.request.recv(1024).strip()
         print '{} wrote:'.format(self.client_address[0])
         print self.data
