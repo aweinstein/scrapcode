@@ -1,4 +1,4 @@
-import socket
+import argparse
 import sys
 import time
 import threading
@@ -6,11 +6,15 @@ import SocketServer
 
 class TCPHandler(SocketServer.BaseRequestHandler):
     def handle(self):
-        data = self.request.recv(1024)
+        data = self.request.recv(1024).strip()
         cur_thread = threading.current_thread()
         response = '{}: {}'.format(cur_thread.name, data)
-        self.request.sendall(response.upper())
-        print 'Running in', cur_thread.name
+        msg = 'Running in {}, received {} from {}'.format(cur_thread.name,
+                                                          data, self.client_address)
+        print msg
+        resp = ' '.join([time.asctime(), data.upper()])
+        print 'sending "{}" as response'.format(resp)
+        self.request.sendall(resp)
 
 class TCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
@@ -24,24 +28,32 @@ class UDPHandler(SocketServer.BaseRequestHandler):
          msg = 'Running in {}, received {} from {}'.format(cur_thread.name,
                                                             data, client_address)
          print msg
-         socket.sendto(data.upper() + ' ' + time.asctime(), self.client_address)
+         resp = ' '.join([time.asctime(), data.upper()])
+         print 'sending "{}" as response'.format(resp)
+         socket.sendto(resp, self.client_address)
 
 class UDPServer(SocketServer.ThreadingMixIn, SocketServer.UDPServer):
     pass
 
 if __name__ == '__main__':
-    host, port = 'localhost', 9998
+    parser = argparse.ArgumentParser(description='TCP/UDP client.')
+    parser.add_argument('-n', '--host', action='store', default='localhost',
+                        help='Server address')
+    parser.add_argument('-p', '--port', action='store', type=int, default=9998,
+                        help='Server port')
+    parser.add_argument('-t', '--protocol', choices=['tcp', 'udp'], default='udp',
+                        help='Protocol')
+    args = parser.parse_args()
 
-    if len(sys.argv) == 3:
-        port = int(sys.argv[2])
+    host, port = args.host, args.port
+    protocol = args.protocol
 
-    if sys.argv[1].lower() == 'tcp':
+    if protocol == 'tcp':
         TCPServer.allow_reuse_address = True
         server = TCPServer((host, port), TCPHandler)
 
-    if sys.argv[1].lower() == 'udp':
+    if protocol == 'udp':
         server = UDPServer((host, port), UDPHandler)
-
 
     ip, port = server.server_address
     print 'ip: {}, port: {}'.format(ip, port)
