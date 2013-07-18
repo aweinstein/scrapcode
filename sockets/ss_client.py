@@ -4,6 +4,7 @@ Client for the SocketServer.
 Based on
 http://docs.python.org/2/library/socketserver.html
 """
+import argparse
 import socket
 import sys
 import time
@@ -30,13 +31,28 @@ def send_udp(data, host, port):
     return received
 
 if __name__ == '__main__':
-    HOST, PORT = 'localhost', 9998
-    data = ' '.join(sys.argv[2:])
-    if sys.argv[1].lower() == 'tcp':
-        received = send_tcp(data, HOST, PORT)
+    parser = argparse.ArgumentParser(description='TCP/UDP client.')
+    parser.add_argument('-n', '--host', action='store', default='localhost',
+                        help='Server address')
+    parser.add_argument('-p', '--port', action='store', type=int, default=9998,
+                        help='Server port')
+    parser.add_argument('-t', '--protocol', choices=['tcp', 'udp'], default='udp',
+                        help='Protocol')
+    parser.add_argument('msg', nargs='+', help='Message to be send')
+    args = parser.parse_args()
 
-    if sys.argv[1].lower() == 'udp':
-        received = send_udp(data, HOST, PORT)
+    host, port = 'localhost', 9998
+    host, port = args.host, args.port
+    protocol = args.protocol
+    data = ' '.join(args.msg)
+
+    print 'Connecting to {}:{} ...'.format(host,port)
+    if protocol == 'tcp':
+        print 'Sending using TCP ...'
+        received = send_tcp(data, host, port)
+    elif protocol == 'udp':
+        print 'Sending using UDP ...'
+        received = send_udp(data, host, port)
 
     print 'Sent:     {}'.format(data)
     print 'Received: {}'.format(received)
