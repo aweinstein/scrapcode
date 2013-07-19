@@ -26,6 +26,8 @@ def send_tcp(data, host, port):
 def send_udp(data, host, port):
     # Create a socket (SOCK_DGRAM means a UDP socket)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    ## sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    ## sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
     sock.sendto(data + '\n', (host, port))
     received = sock.recv(1024)
     return received
