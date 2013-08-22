@@ -1,3 +1,11 @@
+"""Socket server example.
+
+Implements TCP, UDP and UDP broadcast server.
+
+Note: When using an UDP server, a multicast address should be used. For example
+
+$ python socket_server_threaded.py -n 226.1.1.3 -p 1234 -t mudp
+"""
 import argparse
 import socket
 import sys
