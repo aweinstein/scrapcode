@@ -43,7 +43,6 @@ def server():
                 send_array(socket, x)
             else: # Send reply back to client
                 socket.send("World")
-            time.sleep(1)
         except KeyboardInterrupt:
             print
             sys.exit(0)
@@ -65,6 +64,7 @@ def client():
         x = recv_array(socket)
         print "Received"
         print x
+        time.sleep(1)
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
