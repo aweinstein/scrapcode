@@ -7,3 +7,4 @@
 *.txt
 *.bz2
 *.graphml
+.ipynb_checkpoints/
