@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import time
 import threading
-import Queue
+import queue
 import random
 
 class Producer(threading.Thread):
@@ -9,12 +9,12 @@ class Producer(threading.Thread):
         threading.Thread.__init__(self)
         self.running = True
         self.q = q
-        print 'Producer thread started'
+        print('Producer thread started')
 
     def stop(self):
         """Stop the thread execution."""
         self.running = False
-        print 'Producer thread stopped'
+        print('Producer thread stopped')
 
     def run(self):
         while self.running:
@@ -27,22 +27,22 @@ class Consumer(threading.Thread):
         threading.Thread.__init__(self)
         self.running = True
         self.q = q
-        print 'Consumer thread started'
+        print('Consumer thread started')
 
     def stop(self):
         """Stop the thread execution."""
         self.running = False
-        print 'Consumer thread stopped'
+        print('Consumer thread stopped')
 
     def run(self):
         while self.running:
             d = self.q.get(True)
-            print d
+            print(d)
 
 
 if __name__ == "__main__":
 
-    q = Queue.Queue()
+    q = queue.Queue()
     producer = Producer(q)
     producer.daemon = True
     producer.start()
@@ -55,6 +55,6 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         pass
-    print ' '
+    print(' ')
     producer.stop()
     consumer.stop()
